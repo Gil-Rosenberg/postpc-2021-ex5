@@ -10,6 +10,7 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
     /*
     TODO:   - maybe put here private list of all todoItems
             - setItems(new list) { clear current list, addAll new list, notifyDataSetChanged() -> to the recyclerView }
+            - ClickCallBack -> listener
      */
 
     @NonNull

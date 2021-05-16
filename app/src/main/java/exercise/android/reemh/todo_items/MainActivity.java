@@ -23,8 +23,31 @@ public class MainActivity extends AppCompatActivity {
       holder = new TodoItemsHolderImpl();
     }
 
-    // TODO: implement the specs as defined below
-    //    (find all UI components, hook them up, connect everything you need)
+    /*
+    TODO: implement the specs as defined below
+      (find all UI components, hook them up, connect everything you need)
+
+      TODO: findViewBy(recyclerView)
+            List<TodoItem> todoItemsList = createTodoItems()  (CHECK WHERE TO CREATE ITEMS)
+            adapter = new TodoItemAdapter()
+            adapter.setItems(todoItemsList)
+            todoItemRecycler.adapter = adapter  // todoItemRecycler -> findViewById
+            todoItemRecycler.layoutManager(this, RecyclerView.VERTICAL, false)
+     */
+
+
+  }
+
+
+  // TODO maybe for flip screen
+  @Override
+  protected void onSaveInstanceState(@NonNull Bundle outState) {
+    super.onSaveInstanceState(outState);
+  }
+
+  @Override
+  protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
   }
 }
 
