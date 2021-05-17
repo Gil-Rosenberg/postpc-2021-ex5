@@ -9,6 +9,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,16 +28,18 @@ public class MainActivity extends AppCompatActivity {
       holder = new TodoItemsHolderImpl();
     }
 
+    // find all views:
+    EditText editTextInsertTask = findViewById(R.id.editTextInsertTask);
+    FloatingActionButton buttonCreateTodoItem = findViewById(R.id.buttonCreateTodoItem);
+    RecyclerView todoItemRecycler = findViewById(R.id.recyclerTodoItemsList);
+    List<TodoItem> todoItemsList = createTodoItems(); // TODO (CHECK WHERE TO CREATE ITEMS)
+    TodoItemAdapter adapter = new TodoItemAdapter();
+    todoItemRecycler.setAdapter(adapter);   // todoItemRecycler -> findViewById
+    todoItemRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
     /*
     TODO: implement the specs as defined below
       (find all UI components, hook them up, connect everything you need)
 
-      TODO: findViewBy(recyclerView)
-            List<TodoItem> todoItemsList = createTodoItems()  (CHECK WHERE TO CREATE ITEMS)
-            adapter = new TodoItemAdapter()
-            adapter.setItems(todoItemsList)
-            todoItemRecycler.adapter = adapter  // todoItemRecycler -> findViewById
-            todoItemRecycler.layoutManager(this, RecyclerView.VERTICAL, false)
      */
 
 
