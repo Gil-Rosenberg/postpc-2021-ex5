@@ -1,22 +1,29 @@
 package exercise.android.reemh.todo_items;
 
 import android.content.Context;
+import android.graphics.Paint;
+import android.os.Build;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
 
-    TodoItemsHolder itemsHolder;
-    ClickCallBack lister;
-    // private boolean onBind;          // TODO check if i need this field?
+    List<TodoItem> todoItemList = new LinkedList<>();
+    TodoItemsHolderImpl todoItemsHolder;
+    private boolean onBind;
 
-    public TodoItemAdapter(TodoItemsHolder holder, ClickCallBack clickCallBack){
-        itemsHolder = holder;
-        lister = clickCallBack;
+    TodoItemAdapter(TodoItemsHolderImpl holder){
+        todoItemsHolder = holder;
+        setTodo(holder.getCurrentItems());
+        onBind = false;
     }
 
     @NonNull
@@ -30,20 +37,56 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
     }
 
     @Override
-
     // here we need to configure the view holder
     public void onBindViewHolder(@NonNull TodoItemViewHolder holder, int position) {
-        TodoItem todoItem = itemsHolder.getCurrentItems().get(position);
-        holder.text.setText(todoItem.getTodoText());
+        onBind = true;
+        TodoItem todoItem = todoItemList.get(position);
 
-        /*
-        TODO: configure color etc.....
-         */
+        if (todoItem.isDone()){
+            holder.getText().setPaintFlags(holder.getText().getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        }
+
+        else if (todoItem.isInProgress()){
+            holder.getText().setPaintFlags(holder.getText().getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+        }
+
+        holder.getText().setText(todoItem.getTodoText());
+        holder.getDateTimeDisplay().setText(todoItem.getCreationTime());
+
+        holder.getCheckBox().setChecked(!holder.getCheckBox().isChecked());
+        // set listeners:
+        holder.getCheckBox().setOnClickListener(v -> {
+            if (!onBind){
+                if (todoItemsHolder.getInProgressItems().contains(todoItem)){
+                    todoItemsHolder.markItemDone(todoItem);
+                }
+
+                else if (todoItemsHolder.getDoneItems().contains(todoItem)){
+                    todoItemsHolder.markItemInProgress(todoItem);
+                }
+
+                setTodo(todoItemsHolder.getCurrentItems());
+            }
+        });
+
+        // TODO listener for deleting
+        if (!onBind){
+        }
+
+        onBind = false;
     }
 
     @Override
     // recyclerView asks the adapter how much items it needs to render in total (including titles)
     public int getItemCount() {
-        return itemsHolder.getCurrentItems().size();
+        return todoItemList.size();
+    }
+
+    public void setTodo(List<TodoItem> newList){
+        if (!todoItemList.isEmpty()){
+            todoItemList.clear();
+        }
+        todoItemList.addAll(newList);
+        notifyDataSetChanged();
     }
 }

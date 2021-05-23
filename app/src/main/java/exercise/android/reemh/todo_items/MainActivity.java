@@ -2,48 +2,54 @@ package exercise.android.reemh.todo_items;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-  public TodoItemsHolder holder = null;
+  TodoItemsHolderImpl holder = new TodoItemsHolderImpl();
+  TodoItemAdapter adapter = new TodoItemAdapter(holder);
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    if (holder == null) {
-      holder = new TodoItemsHolderImpl();
-    }
-
     // find all views:
     EditText editTextInsertTask = findViewById(R.id.editTextInsertTask);
     FloatingActionButton buttonCreateTodoItem = findViewById(R.id.buttonCreateTodoItem);
     RecyclerView todoItemRecycler = findViewById(R.id.recyclerTodoItemsList);
-    List<TodoItem> todoItemsList = createTodoItems(); // TODO (CHECK WHERE TO CREATE ITEMS)
-    TodoItemAdapter adapter = new TodoItemAdapter();
-    todoItemRecycler.setAdapter(adapter);   // todoItemRecycler -> findViewById
+    adapter.setTodo(holder.getCurrentItems());
     todoItemRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
-    /*
-    TODO: implement the specs as defined below
-      (find all UI components, hook them up, connect everything you need)
+    todoItemRecycler.setAdapter(adapter);   // todoItemRecycler -> findViewById
 
-     */
-
-
+    buttonCreateTodoItem.setOnClickListener(v -> {
+      if (!editTextInsertTask.getText().toString().equals("")){
+        holder.addNewInProgressItem(editTextInsertTask.getText().toString());
+        adapter.setTodo(holder.getCurrentItems());
+      }
+      editTextInsertTask.setText("");
+    });
   }
+
+//  ItemTouchHelper.SimpleCallback itemTouchHelperCallBack = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+//    @Override
+//    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+//      return false;
+//    }
+//
+//    @Override
+//    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+//      //adapter.itemsHolder.getCurrentItems().remove()
+//    }
+
+
 
 
   // TODO maybe for flip screen

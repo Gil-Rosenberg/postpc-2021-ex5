@@ -8,7 +8,7 @@ public class TodoItemsHolderImplTest extends TestCase {
   @Test
   public void when_addingTodoItem_then_callingListShouldHaveThisItem(){
     // setup
-    TodoItemsHolderImpl holderUnderTest = new TodoItemsHolderImpl();
+    TodoItemsHolderImpl holderUnderTest = new TodoItemsHolderImpl(currentItems);
     assertEquals(0, holderUnderTest.getCurrentItems().size());
 
     // test
