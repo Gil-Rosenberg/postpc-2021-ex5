@@ -2,6 +2,7 @@ package exercise.android.reemh.todo_items;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
@@ -32,18 +33,23 @@ public class MainActivity extends AppCompatActivity {
       }
       editTextInsertTask.setText("");
     });
+
+    ItemTouchHelper.SimpleCallback itemTouchHelperCallBack = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+      @Override
+      public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+        return false;
+      }
+
+      @Override
+      public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+        holder.getCurrentItems().remove(viewHolder.getAdapterPosition());
+        adapter.notifyDataSetChanged();
+      }
+    };
+    new ItemTouchHelper(itemTouchHelperCallBack).attachToRecyclerView(todoItemRecycler);
+
   }
 
-//  ItemTouchHelper.SimpleCallback itemTouchHelperCallBack = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
-//    @Override
-//    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-//      return false;
-//    }
-//
-//    @Override
-//    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-//      //adapter.itemsHolder.getCurrentItems().remove()
-//    }
 
 
 
