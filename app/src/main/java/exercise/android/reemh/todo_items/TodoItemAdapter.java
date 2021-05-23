@@ -2,15 +2,11 @@ package exercise.android.reemh.todo_items;
 
 import android.content.Context;
 import android.graphics.Paint;
-import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,7 +18,7 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
 
     TodoItemAdapter(TodoItemsHolderImpl holder){
         todoItemsHolder = holder;
-        setTodo(holder.getCurrentItems());
+        todoItemList = holder.getCurrentItems();
         onBind = false;
     }
 
@@ -42,36 +38,34 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
         onBind = true;
         TodoItem todoItem = todoItemList.get(position);
 
-        if (todoItem.isDone()){
+        if (todoItem.getCompleted()){
             holder.getText().setPaintFlags(holder.getText().getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }
 
-        else if (todoItem.isInProgress()){
+        else{
             holder.getText().setPaintFlags(holder.getText().getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
 
+        // prepare description text:
         holder.getText().setText(todoItem.getTodoText());
+
+        // prepare date text:
         holder.getDateTimeDisplay().setText(todoItem.getCreationTime());
 
-        holder.getCheckBox().setChecked(!holder.getCheckBox().isChecked());
-        // set listeners:
-        holder.getCheckBox().setOnClickListener(v -> {
+        // init checkBox state:
+        holder.getCheckBox().setChecked(todoItem.getCompleted());
+
+        // listener for checkBox:
+        holder.getCheckBox().setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (!onBind){
-                if (todoItemsHolder.getInProgressItems().contains(todoItem)){
-                    todoItemsHolder.markItemDone(todoItem);
-                }
-
-                else if (todoItemsHolder.getDoneItems().contains(todoItem)){
-                    todoItemsHolder.markItemInProgress(todoItem);
-                }
-
-                setTodo(todoItemsHolder.getCurrentItems());
+                todoItemsHolder.setItemProgress(position, isChecked);
+                notifyDataSetChanged();
             }
         });
 
         // TODO listener for deleting
-        if (!onBind){
-        }
+//        if (!onBind){
+//        }
 
         onBind = false;
     }
@@ -80,13 +74,5 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
     // recyclerView asks the adapter how much items it needs to render in total (including titles)
     public int getItemCount() {
         return todoItemList.size();
-    }
-
-    public void setTodo(List<TodoItem> newList){
-        if (!todoItemList.isEmpty()){
-            todoItemList.clear();
-        }
-        todoItemList.addAll(newList);
-        notifyDataSetChanged();
     }
 }

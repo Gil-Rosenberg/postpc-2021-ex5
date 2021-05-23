@@ -2,12 +2,9 @@ package exercise.android.reemh.todo_items;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -25,14 +22,13 @@ public class MainActivity extends AppCompatActivity {
     EditText editTextInsertTask = findViewById(R.id.editTextInsertTask);
     FloatingActionButton buttonCreateTodoItem = findViewById(R.id.buttonCreateTodoItem);
     RecyclerView todoItemRecycler = findViewById(R.id.recyclerTodoItemsList);
-    adapter.setTodo(holder.getCurrentItems());
     todoItemRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
     todoItemRecycler.setAdapter(adapter);   // todoItemRecycler -> findViewById
 
     buttonCreateTodoItem.setOnClickListener(v -> {
       if (!editTextInsertTask.getText().toString().equals("")){
         holder.addNewInProgressItem(editTextInsertTask.getText().toString());
-        adapter.setTodo(holder.getCurrentItems());
+        adapter.notifyDataSetChanged();
       }
       editTextInsertTask.setText("");
     });

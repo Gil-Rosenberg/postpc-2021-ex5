@@ -6,7 +6,6 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.Date;
 
 public class TodoItemViewHolder extends RecyclerView.ViewHolder {
 
