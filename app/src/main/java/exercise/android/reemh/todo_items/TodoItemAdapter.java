@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
@@ -24,7 +23,6 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
 
     @NonNull
     @Override
-    // here we create view holder
     public TodoItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context = parent.getContext();  // Access to Android resources
         View view = LayoutInflater.from(context).inflate(R.layout.row_todo_item, parent, false);
@@ -33,7 +31,6 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
     }
 
     @Override
-    // here we need to configure the view holder
     public void onBindViewHolder(@NonNull TodoItemViewHolder holder, int position) {
         onBind = true;
         TodoItem todoItem = todoItemList.get(position);
@@ -62,18 +59,16 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
                 notifyDataSetChanged();
             }
         });
-
-//        // TODO listener for deleting
-//        if (!onBind){
-//
-//            };
-
         onBind = false;
     }
 
     @Override
-    // recyclerView asks the adapter how much items it needs to render in total (including titles)
     public int getItemCount() {
         return todoItemList.size();
+    }
+
+    public void setTodoItemList(List<TodoItem> currentItems){
+        todoItemList.clear();
+        todoItemList.addAll(currentItems);
     }
 }

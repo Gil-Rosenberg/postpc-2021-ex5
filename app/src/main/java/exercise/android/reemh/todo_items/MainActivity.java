@@ -47,22 +47,20 @@ public class MainActivity extends AppCompatActivity {
       }
     };
     new ItemTouchHelper(itemTouchHelperCallBack).attachToRecyclerView(todoItemRecycler);
-
   }
 
-
-
-
-
-  // TODO maybe for flip screen
   @Override
   protected void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
+    outState.putSerializable("holder", holder);
   }
 
   @Override
   protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
+    holder = (TodoItemsHolderImpl) savedInstanceState.getSerializable("holder");
+    adapter.setTodoItemList(holder.getCurrentItems());
+    adapter.notifyDataSetChanged();
   }
 }
 
