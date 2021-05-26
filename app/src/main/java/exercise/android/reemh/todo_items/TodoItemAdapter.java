@@ -67,8 +67,8 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
         return todoItemList.size();
     }
 
-    public void setTodoItemList(List<TodoItem> currentItems){
+    public void setAdapterFields(TodoItemsHolderImpl holder){
         todoItemList.clear();
-        todoItemList.addAll(currentItems);
+        todoItemList.addAll(holder.getCurrentItems());
     }
 }

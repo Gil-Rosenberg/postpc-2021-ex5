@@ -1,7 +1,5 @@
 package exercise.android.reemh.todo_items;
 
-import android.util.Log;
-
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,13 +47,6 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     }
     else {
       markItemInProgress(currentItems.get(position));
-    }
-  }
-
-  //TODO delete later!
-  public void printAllItems(){
-    for (int i = 0; i < currentItems.size(); i++) {
-      Log.e("item " + i + ":", currentItems.get(i).getTodoText());
     }
   }
 }
