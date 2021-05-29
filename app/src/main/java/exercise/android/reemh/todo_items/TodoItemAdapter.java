@@ -44,7 +44,7 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
         }
 
         // prepare description text:
-        holder.getText().setText(todoItem.getTodoText());
+        holder.getText().setText(todoItem.getDescription());
 
         // prepare date text:
         holder.getDateTimeDisplay().setText(todoItem.getCreationTime());
