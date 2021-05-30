@@ -25,8 +25,6 @@ public interface TodoItemsHolder extends Serializable {
 
   void setItemProgress(int position, boolean isChecked);
 
-  List<TodoItem> getCopies();
-
   TodoItem stringToItem(String string);
 
   void editDescription(String id, String newDescription);

@@ -5,20 +5,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.widget.EditText;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import java.util.List;
+
+import java.util.LinkedList;
 
 public class MainActivity extends AppCompatActivity {
 
   TodoItemsHolderImpl dataBase = null;
   TodoItemAdapter adapter;
-  private BroadcastReceiver receiverToChanges;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -28,32 +24,25 @@ public class MainActivity extends AppCompatActivity {
     if (dataBase == null){
       dataBase = TodoItemApplication.getInstance().getDataBase();
     }
-
     adapter = new TodoItemAdapter(dataBase);
+
+    dataBase.itemsLiveDataPublic.observe(this, todoItems -> {
+      if (todoItems != null){
+        adapter.setAdapterFields(dataBase.getCopies());
+      }
+    });
 
     // find all views:
     EditText editTextInsertTask = findViewById(R.id.editTextInsertTask);
     FloatingActionButton buttonCreateTodoItem = findViewById(R.id.buttonCreateTodoItem);
     RecyclerView todoItemRecycler = findViewById(R.id.recyclerTodoItemsList);
     todoItemRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
-    todoItemRecycler.setAdapter(adapter);   // todoItemRecycler -> findViewById
-
-    receiverToChanges = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals("db_changed")){
-
-          //todo: db was changed. get new list from the intent extra or from db.getCopies()
-          // todo: refresh UI with new items
-        }
-      }
-    };
-    registerReceiver(receiverToChanges, new IntentFilter("db_changed"));
+//    adapter.setAdapterFields(dataBase.getCurrentItems()); // todo not sure??
+    todoItemRecycler.setAdapter(adapter);
 
     buttonCreateTodoItem.setOnClickListener(v -> {
       if (!editTextInsertTask.getText().toString().equals("")){
         dataBase.addNewInProgressItem(editTextInsertTask.getText().toString());
-        adapter.notifyDataSetChanged();
       }
       editTextInsertTask.setText("");
     });
@@ -66,26 +55,13 @@ public class MainActivity extends AppCompatActivity {
 
       @Override
       public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-        dataBase.getCurrentItems().remove(viewHolder.getAdapterPosition());
-        adapter.notifyDataSetChanged();
+        int index = viewHolder.getAdapterPosition();
+        dataBase.deleteItem(dataBase.getCurrentItems().get(index));
+        // dataBase.getCurrentItems().remove(viewHolder.getAdapterPosition()); // todo maybe put this back
+        //adapter.setAdapterFields(dataBase.getCurrentItems());
       }
     };
     new ItemTouchHelper(itemTouchHelperCallBack).attachToRecyclerView(todoItemRecycler);
-  }
-
-
-  // TODO: maybe replace with broadcast
-  @Override
-  protected void onResume(){
-    super.onResume();
-    List<TodoItem> newTodoItems = dataBase.getCopies();
-    // todo: refresh UI with new items
-  }
-
-  @Override
-  protected void onDestroy() {
-    unregisterReceiver(receiverToChanges);
-    super.onDestroy();
   }
 
   @Override
@@ -98,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
   protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
     dataBase = (TodoItemsHolderImpl) savedInstanceState.getSerializable("holder");
-    adapter.setAdapterFields(dataBase);
-    adapter.notifyDataSetChanged();
+    adapter.setAdapterFields(dataBase.getCurrentItems());
   }
 }

@@ -1,11 +1,11 @@
 package exercise.android.reemh.todo_items;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Parcelable;
 import androidx.annotation.Nullable;
-
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -15,27 +15,42 @@ import java.util.UUID;
 
 public class TodoItemsHolderImpl implements TodoItemsHolder {
   
-  private final LinkedList<TodoItem> currentItems = new LinkedList<>();
-  private final Context context;
+  private ArrayList<TodoItem> currentItems = new ArrayList<>();
+  private LinkedList<TodoItem> itemsInProgress = new LinkedList<>();
+  private ArrayList<TodoItem> doneItems = new ArrayList<>();
   private final SharedPreferences sp;
+  private final MutableLiveData<List<TodoItem>> itemsLiveDataMutable = new MutableLiveData<>();
+
+  public final LiveData<List<TodoItem>> itemsLiveDataPublic = itemsLiveDataMutable;
 
   public TodoItemsHolderImpl(Context context){
-    this.context = context;
     this.sp = context.getSharedPreferences("local_db_items", Context.MODE_PRIVATE);
     initializeFromSp();
   }
 
   private void initializeFromSp(){
+    itemsInProgress.clear();
+    doneItems.clear();
+
     Set<String> keys = sp.getAll().keySet();
     for (String key : keys) {
       String itemSavedAsString = sp.getString(key, null);
       TodoItem item = stringToItem(itemSavedAsString);
-      currentItems.addFirst(item);
+      if (!item.getCompleted()){
+        itemsInProgress.addFirst(item);
+      }
+      else {
+        doneItems.add(item);
+      }
     }
+    itemsLiveDataMutable.setValue(new LinkedList<>(this.getCurrentItems()));
   }
 
   @Override
   public List<TodoItem> getCurrentItems() {
+    currentItems.clear();
+    currentItems.addAll(itemsInProgress);
+    currentItems.addAll(doneItems);
     return currentItems;
   }
 
@@ -44,81 +59,97 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     String date = java.text.DateFormat.getDateTimeInstance().format(new Date());
     String id = UUID.randomUUID().toString();
     TodoItem todoItem = new TodoItem(id, description, date, false);
-    currentItems.addFirst(todoItem);
+    itemsInProgress.addFirst(todoItem);
 
     SharedPreferences.Editor editor = sp.edit();
     editor.putString(todoItem.getId(), todoItem.serialize());
     editor.apply();
 
-    sendBroadcastDbChanged();
+    itemsLiveDataMutable.setValue(new ArrayList<>(this.getCurrentItems()));
   }
 
   @Override
   public void markItemDone(TodoItem item) {
-    currentItems.remove(item);
-    currentItems.addLast(item);
-    item.completeTask();
+    if (item == null) return;
 
-    sendBroadcastDbChanged();
-  }
-
-  @Override
-  public void markItemInProgress(TodoItem item) {
-    item.restoreTask();
-    currentItems.remove(item);
-    currentItems.addFirst(item);
-
-    sendBroadcastDbChanged();
-  }
-
-  @Override
-  public void deleteItem(TodoItem item) {
-    currentItems.remove(item);
-
-    SharedPreferences.Editor editor = sp.edit();
-    editor.remove(item.getId());
-    editor.apply();
-
-    sendBroadcastDbChanged();
-  }
-
-  @Override
-  public void setItemProgress(int position, boolean isChecked) {
-    if (isChecked){
-      markItemDone(currentItems.get(position));
-    }
-    else {
-      markItemInProgress(currentItems.get(position));
-    }
-
-    sendBroadcastDbChanged();
-  }
-
-  @Override
-  public void editDescription(String id, String newDescription){
-    TodoItem oldItem = getItemById(id);
-    if (oldItem == null) return;
-    String date = java.text.DateFormat.getDateTimeInstance().format(new Date());
-    TodoItem newItem = new TodoItem(id, newDescription, date, oldItem.getCompleted());
-    currentItems.remove(oldItem);
-    currentItems.addFirst(newItem);
+    TodoItem newItem = new TodoItem(item.getId(), item.getDescription(), item.getTimeAsText(), true);
+    itemsInProgress.remove(item);
+    doneItems.add(newItem);
 
     SharedPreferences.Editor editor = sp.edit();
     editor.putString(newItem.getId(), newItem.serialize());
     editor.apply();
 
-    sendBroadcastDbChanged();
+    itemsLiveDataMutable.setValue(new LinkedList<>(this.getCurrentItems()));
   }
 
   @Override
-  public List<TodoItem> getCopies(){
-    return new LinkedList<>(currentItems);
+  public void markItemInProgress(TodoItem item) {
+    if (item == null) return;
+
+    TodoItem newItem = new TodoItem(item.getId(), item.getDescription(), item.getTimeAsText(), false);
+    doneItems.remove(item);
+    itemsInProgress.addFirst(newItem);
+
+    SharedPreferences.Editor editor = sp.edit();
+    editor.putString(newItem.getId(), newItem.serialize());
+    editor.apply();
+
+    itemsLiveDataMutable.setValue(new LinkedList<>(this.getCurrentItems()));
   }
 
-  private void sendBroadcastDbChanged(){
-    Intent broadcast = new Intent("db_changed");
-    broadcast.putExtra("new_list", (Parcelable) getCopies()); //todo: Parcelable ??
-    context.sendBroadcast(broadcast);
+  @Override
+  public void deleteItem(TodoItem item) {
+    if (item == null) return;
+
+    if (itemsInProgress.contains(item)){
+      itemsInProgress.remove(item);
+    }
+    else doneItems.remove(item);
+
+    SharedPreferences.Editor editor = sp.edit();
+    editor.remove(item.getId());
+    editor.apply();
+
+    itemsLiveDataMutable.setValue(new LinkedList<>(this.getCurrentItems()));
+  }
+
+  @Override
+  public void setItemProgress(int position, boolean isChecked) {
+    TodoItem itemToEdit = this.getCurrentItems().get(position);
+
+    if (isChecked){
+      markItemDone(itemToEdit);
+    }
+    else {
+      markItemInProgress(itemToEdit);
+    }
+  }
+
+  @Override
+  public void editDescription(String id, String newDescription){
+    if (id.equals("") || newDescription.equals("")) return;
+
+    TodoItem oldItem = getItemById(id);
+    if (oldItem == null) return;
+
+    String date = java.text.DateFormat.getDateTimeInstance().format(new Date());
+    TodoItem newItem = new TodoItem(id, newDescription, date, oldItem.getCompleted());
+
+    if (itemsInProgress.contains(oldItem)){
+      itemsInProgress.remove(oldItem);
+      itemsInProgress.addFirst(newItem);
+    }
+    else {
+      doneItems.remove(oldItem);
+      doneItems.add(newItem);
+    }
+
+    SharedPreferences.Editor editor = sp.edit();
+    editor.putString(newItem.getId(), newItem.serialize());
+    editor.apply();
+
+    itemsLiveDataMutable.setValue(new LinkedList<>(this.getCurrentItems()));
   }
 
   private @Nullable TodoItem getItemById(String id){
@@ -146,5 +177,9 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
       System.err.println("exception. input: " + string + ".\n" + "exception: " + e);
       return null;
     }
+  }
+
+  public LinkedList<TodoItem> getCopies(){
+    return new LinkedList<>(currentItems);
   }
 }

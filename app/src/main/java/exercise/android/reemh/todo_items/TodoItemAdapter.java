@@ -2,6 +2,7 @@ package exercise.android.reemh.todo_items;
 
 import android.content.Context;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,7 +48,7 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
         holder.getText().setText(todoItem.getDescription());
 
         // prepare date text:
-        holder.getDateTimeDisplay().setText(todoItem.getCreationTime());
+        holder.getDateTimeDisplay().setText(todoItem.getTimeAsText());
 
         // init checkBox state:
         holder.getCheckBox().setChecked(todoItem.getCompleted());
@@ -67,8 +68,17 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
         return todoItemList.size();
     }
 
-    public void setAdapterFields(TodoItemsHolderImpl holder){
+    public void setAdapterFields(List<TodoItem> itemList){
         todoItemList.clear();
-        todoItemList.addAll(holder.getCurrentItems());
+        todoItemList.addAll(itemList);
+        printAll();     //todo DELETE
+        notifyDataSetChanged();
+    }
+
+    public void printAll(){
+        for (int i = 0; i < this.todoItemList.size(); i++) {
+            Log.e("adapter list[" + i + "]: ", todoItemList.get(i).getDescription() + "\n");
+        }
+        Log.e("s", "--------------------------------------------------");
     }
 }

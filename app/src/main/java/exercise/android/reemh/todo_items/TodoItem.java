@@ -5,13 +5,15 @@ import java.io.Serializable;
 public class TodoItem implements Serializable {
     private final String id;
     private String description;
-    private String creationTime;
-    private boolean isCompleted;
+    private String timeAsText;
+    private final boolean isCompleted;
+    private long doneTime = -1L;
+    private final long creationTime = System.currentTimeMillis();
 
     public TodoItem(String id, String description, String time, boolean flag){
         this.id = id;
         this.description = description;
-        this.creationTime = time;
+        this.timeAsText = time;
         this.isCompleted = flag;
     }
 
@@ -19,9 +21,9 @@ public class TodoItem implements Serializable {
         return id;
     }
 
-    public String getCreationTime() { return creationTime; }
+    public String getTimeAsText() { return timeAsText; }
 
-    public void setCreationTime(String time) { creationTime = time; }
+    public void setTimeAsText(String time) { timeAsText = time; }
 
     public String getDescription() { return description; }
 
@@ -29,19 +31,11 @@ public class TodoItem implements Serializable {
         this.description = description;
     }
 
-    public void completeTask(){
-        isCompleted = true;
-    }
-
-    public void restoreTask(){
-        isCompleted = false;
-    }
-
     public  boolean getCompleted(){
         return isCompleted;
     }
 
     public String serialize(){
-        return description + "%#" + creationTime + "%#" + isCompleted + "%#" + id;
+        return description + "%#" + timeAsText + "%#" + isCompleted + "%#" + id;
     }
 }
