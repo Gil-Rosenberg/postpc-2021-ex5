@@ -1,8 +1,8 @@
 package exercise.android.reemh.todo_items;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Paint;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +15,7 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
     List<TodoItem> todoItemList;
     TodoItemsHolderImpl todoItemsHolder;
     private boolean onBind;
+    private Context context;
 
     TodoItemAdapter(TodoItemsHolderImpl holder){
         todoItemsHolder = holder;
@@ -25,7 +26,7 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
     @NonNull
     @Override
     public TodoItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context = parent.getContext();  // Access to Android resources
+        context = parent.getContext();  // Access to Android resources
         View view = LayoutInflater.from(context).inflate(R.layout.row_todo_item, parent, false);
 
         return new TodoItemViewHolder(view);
@@ -37,15 +38,15 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
         TodoItem todoItem = todoItemList.get(position);
 
         if (todoItem.getCompleted()){
-            holder.getText().setPaintFlags(holder.getText().getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.getDescription().setPaintFlags(holder.getDescription().getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }
 
         else{
-            holder.getText().setPaintFlags(holder.getText().getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            holder.getDescription().setPaintFlags(holder.getDescription().getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
 
         // prepare description text:
-        holder.getText().setText(todoItem.getDescription());
+        holder.getDescription().setText(todoItem.getDescription());
 
         // prepare date text:
         holder.getDateTimeDisplay().setText(todoItem.getTimeAsText());
@@ -60,6 +61,14 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
                 notifyDataSetChanged();
             }
         });
+
+        holder.getDescription().setOnClickListener(v -> {
+            if (!onBind) {
+                Intent editItemIntent = new Intent(context, EditItemActivity.class);
+                editItemIntent.putExtra("itemToEdit", todoItem);
+                context.startActivity(editItemIntent);
+            }
+        });
         onBind = false;
     }
 
@@ -71,14 +80,6 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
     public void setAdapterFields(List<TodoItem> itemList){
         todoItemList.clear();
         todoItemList.addAll(itemList);
-        printAll();     //todo DELETE
         notifyDataSetChanged();
-    }
-
-    public void printAll(){
-        for (int i = 0; i < this.todoItemList.size(); i++) {
-            Log.e("adapter list[" + i + "]: ", todoItemList.get(i).getDescription() + "\n");
-        }
-        Log.e("s", "--------------------------------------------------");
     }
 }

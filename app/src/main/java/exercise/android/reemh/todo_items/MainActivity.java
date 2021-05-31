@@ -9,8 +9,6 @@ import android.os.Bundle;
 import android.widget.EditText;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.LinkedList;
-
 public class MainActivity extends AppCompatActivity {
 
   TodoItemsHolderImpl dataBase = null;
@@ -37,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton buttonCreateTodoItem = findViewById(R.id.buttonCreateTodoItem);
     RecyclerView todoItemRecycler = findViewById(R.id.recyclerTodoItemsList);
     todoItemRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
-//    adapter.setAdapterFields(dataBase.getCurrentItems()); // todo not sure??
     todoItemRecycler.setAdapter(adapter);
 
     buttonCreateTodoItem.setOnClickListener(v -> {
@@ -62,18 +59,5 @@ public class MainActivity extends AppCompatActivity {
       }
     };
     new ItemTouchHelper(itemTouchHelperCallBack).attachToRecyclerView(todoItemRecycler);
-  }
-
-  @Override
-  protected void onSaveInstanceState(@NonNull Bundle outState) {
-    super.onSaveInstanceState(outState);
-    outState.putSerializable("holder", dataBase);
-  }
-
-  @Override
-  protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-    super.onRestoreInstanceState(savedInstanceState);
-    dataBase = (TodoItemsHolderImpl) savedInstanceState.getSerializable("holder");
-    adapter.setAdapterFields(dataBase.getCurrentItems());
   }
 }

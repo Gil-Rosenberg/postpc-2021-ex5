@@ -9,15 +9,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class TodoItemViewHolder extends RecyclerView.ViewHolder {
 
-    private CheckBox checkBox;
-    private TextView text;
-    private TextView dateTimeDisplay;
+    private final CheckBox checkBox;
+    private final TextView description;
+    private final TextView dateTimeDisplay;
 
     @SuppressLint("SimpleDateFormat")
     public TodoItemViewHolder(@NonNull View itemView) {    // View itemView = row_todo_item.xml
         super(itemView);
         checkBox = itemView.findViewById(R.id.checkBox);
-        text = itemView.findViewById(R.id.itemText);
+        description = itemView.findViewById(R.id.itemText);
         dateTimeDisplay = itemView.findViewById(R.id.creationTime);
     }
 
@@ -25,8 +25,8 @@ public class TodoItemViewHolder extends RecyclerView.ViewHolder {
         return checkBox;
     }
 
-    public TextView getText() {
-        return text;
+    public TextView getDescription() {
+        return description;
     }
 
     public TextView getDateTimeDisplay() {
