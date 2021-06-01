@@ -1,6 +1,9 @@
 package exercise.android.reemh.todo_items;
 
 import android.app.Application;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 /**
  * This is the Singleton
@@ -13,6 +16,7 @@ public class TodoItemApplication extends Application {
         return dataBase;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate(){
         super.onCreate();

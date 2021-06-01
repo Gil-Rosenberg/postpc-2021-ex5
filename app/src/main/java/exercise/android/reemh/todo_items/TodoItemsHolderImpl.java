@@ -2,9 +2,14 @@ package exercise.android.reemh.todo_items;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
+
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -15,19 +20,21 @@ import java.util.UUID;
 
 public class TodoItemsHolderImpl implements TodoItemsHolder {
   
-  private ArrayList<TodoItem> currentItems = new ArrayList<>();
-  private LinkedList<TodoItem> itemsInProgress = new LinkedList<>();
-  private ArrayList<TodoItem> doneItems = new ArrayList<>();
+  private final ArrayList<TodoItem> currentItems = new ArrayList<>();
+  private final LinkedList<TodoItem> itemsInProgress = new LinkedList<>();
+  private final ArrayList<TodoItem> doneItems = new ArrayList<>();
   private final SharedPreferences sp;
   private final MutableLiveData<List<TodoItem>> itemsLiveDataMutable = new MutableLiveData<>();
 
   public final LiveData<List<TodoItem>> itemsLiveDataPublic = itemsLiveDataMutable;
 
+  @RequiresApi(api = Build.VERSION_CODES.O)
   public TodoItemsHolderImpl(Context context){
     this.sp = context.getSharedPreferences("local_db_items", Context.MODE_PRIVATE);
     initializeFromSp();
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.O)
   private void initializeFromSp(){
     itemsInProgress.clear();
     doneItems.clear();
@@ -36,7 +43,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     for (String key : keys) {
       String itemSavedAsString = sp.getString(key, null);
       TodoItem item = stringToItem(itemSavedAsString);
-      if (!item.isCompleted()){
+      if (!item.isDone()){
         itemsInProgress.addFirst(item);
       }
       else {
@@ -54,6 +61,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     return currentItems;
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.O)
   @Override
   public void addNewInProgressItem(String description) {
     String date = java.text.DateFormat.getDateTimeInstance().format(new Date());
@@ -62,12 +70,13 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     itemsInProgress.addFirst(todoItem);
 
     SharedPreferences.Editor editor = sp.edit();
-    editor.putString(todoItem.getId(), todoItem.serialize());
+    editor.putString(todoItem.getId(), todoItem.ItemToString());
     editor.apply();
 
     itemsLiveDataMutable.setValue(new ArrayList<>(this.getCurrentItems()));
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.O)
   @Override
   public void markItemDone(TodoItem item) {
     if (item == null) return;
@@ -77,12 +86,13 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     doneItems.add(newItem);
 
     SharedPreferences.Editor editor = sp.edit();
-    editor.putString(newItem.getId(), newItem.serialize());
+    editor.putString(newItem.getId(), newItem.ItemToString());
     editor.apply();
 
     itemsLiveDataMutable.setValue(new LinkedList<>(this.getCurrentItems()));
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.O)
   @Override
   public void markItemInProgress(TodoItem item) {
     if (item == null) return;
@@ -92,7 +102,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     itemsInProgress.addFirst(newItem);
 
     SharedPreferences.Editor editor = sp.edit();
-    editor.putString(newItem.getId(), newItem.serialize());
+    editor.putString(newItem.getId(), newItem.ItemToString());
     editor.apply();
 
     itemsLiveDataMutable.setValue(new LinkedList<>(this.getCurrentItems()));
@@ -114,6 +124,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     itemsLiveDataMutable.setValue(new LinkedList<>(this.getCurrentItems()));
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.O)
   @Override
   public void setItemProgressByPosition(int position, boolean isChecked) {
     TodoItem itemToEdit = this.getCurrentItems().get(position);
@@ -126,6 +137,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     }
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.O)
   public void setItemProgress(TodoItem item, boolean isChecked) {
     if (isChecked){
       markItemDone(item);
@@ -135,6 +147,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     }
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.O)
   @Override
   public void editDescription(String id, String newDescription){
     if (id.equals("") || newDescription.equals("")) return;
@@ -143,7 +156,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     if (oldItem == null) return;
 
     String date = java.text.DateFormat.getDateTimeInstance().format(new Date());
-    TodoItem newItem = new TodoItem(id, newDescription, date, oldItem.isCompleted());
+    TodoItem newItem = new TodoItem(id, newDescription, date, oldItem.isDone());
 
     if (itemsInProgress.contains(oldItem)){
       itemsInProgress.remove(oldItem);
@@ -155,7 +168,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     }
 
     SharedPreferences.Editor editor = sp.edit();
-    editor.putString(newItem.getId(), newItem.serialize());
+    editor.putString(newItem.getId(), newItem.ItemToString());
     editor.apply();
 
     itemsLiveDataMutable.setValue(new LinkedList<>(this.getCurrentItems()));
@@ -172,6 +185,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     return todoItem;
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.O)
   @Override
   public TodoItem stringToItem(String string){
     if (string == null) return null;
@@ -191,4 +205,16 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
   public LinkedList<TodoItem> getCopies(){
     return new LinkedList<>(currentItems);
   }
-}
+
+  @RequiresApi(api = Build.VERSION_CODES.O)
+  public void editDescription(TodoItem itemToEdit, String description) {
+    itemToEdit.setDescription(description);
+    itemToEdit.setLastModification(LocalDateTime.now().toString());
+
+    itemsLiveDataMutable.setValue(getCurrentItems());
+
+    SharedPreferences.Editor editor = sp.edit();
+    editor.putString(itemToEdit.getId(), itemToEdit.ItemToString());
+    editor.apply();
+  }
+  }

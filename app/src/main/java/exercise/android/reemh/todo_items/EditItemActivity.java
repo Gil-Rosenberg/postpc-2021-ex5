@@ -1,11 +1,15 @@
 package exercise.android.reemh.todo_items;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 
@@ -14,16 +18,11 @@ public class EditItemActivity extends AppCompatActivity {
     private TodoItemsHolderImpl dataBase = null;
     private boolean dataChanged = false;
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit_item_activity);
-
-        // find all views:
-        EditText editDescription = findViewById(R.id.new_description);
-        TextView creationTime = findViewById(R.id.time_stamp_creation_time);
-        TextView lastModified = findViewById(R.id.time_stamp_last_modified);
-        CheckBox checkBox = findViewById(R.id.checkBoxEdit);
 
         if (dataBase == null){
             dataBase = TodoItemApplication.getInstance().getDataBase();
@@ -32,19 +31,39 @@ public class EditItemActivity extends AppCompatActivity {
         Intent intentOpenedMe = getIntent();
         TodoItem itemToEdit = (TodoItem) intentOpenedMe.getSerializableExtra("itemToEdit");
 
-        // current text before change:
-        editDescription.setText(itemToEdit.getDescription());
+        // find all views:
+        EditText description = findViewById(R.id.new_description);
+        TextView creationTime = findViewById(R.id.time_stamp_creation_time);
+        TextView lastModify = findViewById(R.id.time_stamp_last_modified);
+        CheckBox checkBox = findViewById(R.id.checkBoxEdit);
 
-        // set creation time:
+        //set views with current data
+        description.setText(itemToEdit.getDescription());
         creationTime.setText(itemToEdit.getCreationTime());
+        lastModify.setText(itemToEdit.getLastModification());
+        checkBox.setChecked(itemToEdit.isDone());
+
 
         // edit text:
-        editDescription.setOnClickListener(v -> {
-            dataChanged = true;
-            itemToEdit.setDescription(editDescription.getText().toString());
+        description.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                dataBase.editDescription(itemToEdit, description.getText().toString());
+                lastModify.setText(itemToEdit.getLastModification());
+            }
         });
 
-        // edit state:
+        // edit checkBox:
         checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             dataChanged = true;
             dataBase.setItemProgress(itemToEdit, isChecked);
