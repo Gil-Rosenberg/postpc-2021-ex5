@@ -68,7 +68,7 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
         holder.getDescription().setOnClickListener(v -> {
             if (!onBind) {
                 Intent editItemIntent = new Intent(context, EditItemActivity.class);
-                editItemIntent.putExtra("itemToEdit", todoItem);
+                editItemIntent.putExtra("itemToEdit", todoItem.getId());
                 context.startActivity(editItemIntent);
             }
         });

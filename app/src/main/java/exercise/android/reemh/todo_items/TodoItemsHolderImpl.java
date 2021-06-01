@@ -19,23 +19,22 @@ import java.util.Set;
 import java.util.UUID;
 
 public class TodoItemsHolderImpl implements TodoItemsHolder {
-  
+
   private final ArrayList<TodoItem> currentItems = new ArrayList<>();
   private final LinkedList<TodoItem> itemsInProgress = new LinkedList<>();
   private final ArrayList<TodoItem> doneItems = new ArrayList<>();
   private final SharedPreferences sp;
   private final MutableLiveData<List<TodoItem>> itemsLiveDataMutable = new MutableLiveData<>();
-
   public final LiveData<List<TodoItem>> itemsLiveDataPublic = itemsLiveDataMutable;
 
   @RequiresApi(api = Build.VERSION_CODES.O)
-  public TodoItemsHolderImpl(Context context){
+  public TodoItemsHolderImpl(Context context) {
     this.sp = context.getSharedPreferences("local_db_items", Context.MODE_PRIVATE);
     initializeFromSp();
   }
 
   @RequiresApi(api = Build.VERSION_CODES.O)
-  private void initializeFromSp(){
+  private void initializeFromSp() {
     itemsInProgress.clear();
     doneItems.clear();
 
@@ -43,10 +42,9 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     for (String key : keys) {
       String itemSavedAsString = sp.getString(key, null);
       TodoItem item = stringToItem(itemSavedAsString);
-      if (!item.isDone()){
+      if (!item.isDone()) {
         itemsInProgress.addFirst(item);
-      }
-      else {
+      } else {
         doneItems.add(item);
       }
     }
@@ -112,10 +110,9 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
   public void deleteItem(TodoItem item) {
     if (item == null) return;
 
-    if (itemsInProgress.contains(item)){
+    if (itemsInProgress.contains(item)) {
       itemsInProgress.remove(item);
-    }
-    else doneItems.remove(item);
+    } else doneItems.remove(item);
 
     SharedPreferences.Editor editor = sp.edit();
     editor.remove(item.getId());
@@ -129,27 +126,25 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
   public void setItemProgressByPosition(int position, boolean isChecked) {
     TodoItem itemToEdit = this.getCurrentItems().get(position);
 
-    if (isChecked){
+    if (isChecked) {
       markItemDone(itemToEdit);
-    }
-    else {
+    } else {
       markItemInProgress(itemToEdit);
     }
   }
 
   @RequiresApi(api = Build.VERSION_CODES.O)
   public void setItemProgress(TodoItem item, boolean isChecked) {
-    if (isChecked){
+    if (isChecked) {
       markItemDone(item);
-    }
-    else {
+    } else {
       markItemInProgress(item);
     }
   }
 
   @RequiresApi(api = Build.VERSION_CODES.O)
   @Override
-  public void editDescription(String id, String newDescription){
+  public void editDescription(String id, String newDescription) {
     if (id.equals("") || newDescription.equals("")) return;
 
     TodoItem oldItem = getItemById(id);
@@ -158,11 +153,10 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     String date = java.text.DateFormat.getDateTimeInstance().format(new Date());
     TodoItem newItem = new TodoItem(id, newDescription, date, oldItem.isDone());
 
-    if (itemsInProgress.contains(oldItem)){
+    if (itemsInProgress.contains(oldItem)) {
       itemsInProgress.remove(oldItem);
       itemsInProgress.addFirst(newItem);
-    }
-    else {
+    } else {
       doneItems.remove(oldItem);
       doneItems.add(newItem);
     }
@@ -174,11 +168,12 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     itemsLiveDataMutable.setValue(new LinkedList<>(this.getCurrentItems()));
   }
 
-  private @Nullable TodoItem getItemById(String id){
+  private @Nullable
+  TodoItem getItemById(String id) {
     TodoItem todoItem = null;
 
-    for (TodoItem item:currentItems) {
-      if (item.getId().equals(id)){
+    for (TodoItem item : currentItems) {
+      if (item.getId().equals(id)) {
         todoItem = item;
       }
     }
@@ -187,7 +182,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
 
   @RequiresApi(api = Build.VERSION_CODES.O)
   @Override
-  public TodoItem stringToItem(String string){
+  public TodoItem stringToItem(String string) {
     if (string == null) return null;
     try {
       List<String> split = Arrays.asList(string.split("%#"));
@@ -196,13 +191,13 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
       boolean isCompleted = Boolean.getBoolean(split.get(2));
       String id = split.get(3);
       return new TodoItem(id, description, time, isCompleted);
-    }catch (Exception e){
+    } catch (Exception e) {
       System.err.println("exception. input: " + string + ".\n" + "exception: " + e);
       return null;
     }
   }
 
-  public LinkedList<TodoItem> getCopies(){
+  public LinkedList<TodoItem> getCopies() {
     return new LinkedList<>(currentItems);
   }
 
@@ -217,4 +212,20 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     editor.putString(itemToEdit.getId(), itemToEdit.ItemToString());
     editor.apply();
   }
+
+  public TodoItem getById(String id) {
+    for (TodoItem item : itemsInProgress) {
+      if (item.getId().equals(id)) {
+        return item;
+      }
+    }
+
+    for (TodoItem item : doneItems) {
+      if (item.getId().equals(id)) {
+        return item;
+      }
+    }
+    return null;
   }
+}
+

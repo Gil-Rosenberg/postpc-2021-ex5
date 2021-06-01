@@ -16,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity;
 public class EditItemActivity extends AppCompatActivity {
 
     private TodoItemsHolderImpl dataBase = null;
-    private boolean dataChanged = false;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -29,7 +28,10 @@ public class EditItemActivity extends AppCompatActivity {
         }
 
         Intent intentOpenedMe = getIntent();
-        TodoItem itemToEdit = (TodoItem) intentOpenedMe.getSerializableExtra("itemToEdit");
+        String itemIdToEdit = intentOpenedMe.getStringExtra("itemToEdit");
+
+        // finding the item we want to edit
+        TodoItem itemToEdit = dataBase.getById(itemIdToEdit);
 
         // find all views:
         EditText description = findViewById(R.id.new_description);
@@ -65,15 +67,12 @@ public class EditItemActivity extends AppCompatActivity {
 
         // edit checkBox:
         checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            dataChanged = true;
-            dataBase.setItemProgress(itemToEdit, isChecked);
+            if (isChecked){
+                dataBase.markItemDone(itemToEdit);
+            }
+            else {
+                dataBase.markItemInProgress(itemToEdit);
+            }
         });
-
-        if (dataChanged){
-
-            dataChanged = false;
-        }
-
-
     }
 }
