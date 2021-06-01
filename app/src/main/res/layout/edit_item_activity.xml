@@ -19,7 +19,7 @@
         app:layout_constraintTop_toBottomOf="@+id/description_title" />
 
     <CheckBox
-        android:id="@+id/checkBox2"
+        android:id="@+id/checkBoxEdit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -46,7 +46,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
         android:fontFamily="@font/brawler"
-        android:text="timeStamp"
+        android:text=""
         android:textColor="@color/black"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -95,7 +95,7 @@
         app:layout_constraintTop_toBottomOf="@+id/divider" />
 
     <TextView
-        android:id="@+id/time_stamp_last_modified2"
+        android:id="@+id/time_stamp_creation_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -113,7 +113,7 @@
         android:layout_height="1dp"
         android:layout_marginTop="16dp"
         android:background="?android:attr/listDivider"
-        app:layout_constraintTop_toBottomOf="@+id/time_stamp_last_modified2"
+        app:layout_constraintTop_toBottomOf="@+id/time_stamp_creation_time"
         tools:layout_editor_absoluteX="2dp" />
 
     <View
@@ -124,16 +124,6 @@
         android:background="?android:attr/listDivider"
         app:layout_constraintTop_toBottomOf="@+id/time_stamp_last_modified"
         tools:layout_editor_absoluteX="16dp" />
-
-    <ImageButton
-        android:id="@+id/imageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_revert" />
 
     <ImageView
         android:id="@+id/imageView"

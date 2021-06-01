@@ -37,7 +37,7 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
         onBind = true;
         TodoItem todoItem = todoItemList.get(position);
 
-        if (todoItem.getCompleted()){
+        if (todoItem.isCompleted()){
             holder.getDescription().setPaintFlags(holder.getDescription().getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }
 
@@ -49,15 +49,15 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemViewHolder> {
         holder.getDescription().setText(todoItem.getDescription());
 
         // prepare date text:
-        holder.getDateTimeDisplay().setText(todoItem.getTimeAsText());
+        holder.getDateTimeDisplay().setText(todoItem.getCreationTime());
 
         // init checkBox state:
-        holder.getCheckBox().setChecked(todoItem.getCompleted());
+        holder.getCheckBox().setChecked(todoItem.isCompleted());
 
         // listener for checkBox:
         holder.getCheckBox().setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (!onBind){
-                todoItemsHolder.setItemProgress(position, isChecked);
+                todoItemsHolder.setItemProgressByPosition(position, isChecked);
                 notifyDataSetChanged();
             }
         });

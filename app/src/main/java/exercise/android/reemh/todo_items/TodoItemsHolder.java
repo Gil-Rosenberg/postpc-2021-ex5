@@ -23,7 +23,7 @@ public interface TodoItemsHolder extends Serializable {
   /** delete the @param item */
   void deleteItem(TodoItem item);
 
-  void setItemProgress(int position, boolean isChecked);
+  void setItemProgressByPosition(int position, boolean isChecked);
 
   TodoItem stringToItem(String string);
 

@@ -36,7 +36,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     for (String key : keys) {
       String itemSavedAsString = sp.getString(key, null);
       TodoItem item = stringToItem(itemSavedAsString);
-      if (!item.getCompleted()){
+      if (!item.isCompleted()){
         itemsInProgress.addFirst(item);
       }
       else {
@@ -72,7 +72,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
   public void markItemDone(TodoItem item) {
     if (item == null) return;
 
-    TodoItem newItem = new TodoItem(item.getId(), item.getDescription(), item.getTimeAsText(), true);
+    TodoItem newItem = new TodoItem(item.getId(), item.getDescription(), item.getCreationTime(), true);
     itemsInProgress.remove(item);
     doneItems.add(newItem);
 
@@ -87,7 +87,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
   public void markItemInProgress(TodoItem item) {
     if (item == null) return;
 
-    TodoItem newItem = new TodoItem(item.getId(), item.getDescription(), item.getTimeAsText(), false);
+    TodoItem newItem = new TodoItem(item.getId(), item.getDescription(), item.getCreationTime(), false);
     doneItems.remove(item);
     itemsInProgress.addFirst(newItem);
 
@@ -115,7 +115,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
   }
 
   @Override
-  public void setItemProgress(int position, boolean isChecked) {
+  public void setItemProgressByPosition(int position, boolean isChecked) {
     TodoItem itemToEdit = this.getCurrentItems().get(position);
 
     if (isChecked){
@@ -123,6 +123,15 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     }
     else {
       markItemInProgress(itemToEdit);
+    }
+  }
+
+  public void setItemProgress(TodoItem item, boolean isChecked) {
+    if (isChecked){
+      markItemDone(item);
+    }
+    else {
+      markItemInProgress(item);
     }
   }
 
@@ -134,7 +143,7 @@ public class TodoItemsHolderImpl implements TodoItemsHolder {
     if (oldItem == null) return;
 
     String date = java.text.DateFormat.getDateTimeInstance().format(new Date());
-    TodoItem newItem = new TodoItem(id, newDescription, date, oldItem.getCompleted());
+    TodoItem newItem = new TodoItem(id, newDescription, date, oldItem.isCompleted());
 
     if (itemsInProgress.contains(oldItem)){
       itemsInProgress.remove(oldItem);
